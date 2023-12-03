@@ -1,0 +1,45 @@
+---
+title: "Music vs Mental Health Analysis"
+author: "Calvin, Vy, Karen"
+date: "December 2, 2023"
+output: pdf_document
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Executive Summary
+
+We aim to explore how different music genres impact mental health by analyzing relevant data. This will help us determine which genre is the most beneficial for mental health. We'll compare this to the amount of people suffering from certain mental conditions from each genre.
+
+# Importing the dataset
+
+```{r}
+mxmh_survey_results <- read.csv('mxmh_survey_results.csv')
+master_song_data <- read.csv('master_song_data.csv')
+```
+
+# Analysis
+
+```{r}
+# Top 5 favorite genres
+genre_counts <- table(mxmh_survey_results$Fav.genre)
+sorted_genres <- sort(genre_counts, decreasing = TRUE)
+sorted_genres
+```
+
+
+- As shown from the data above, the top 5 music that people listen to are rock, pop, metal, classic, video game music.
+
+```{r}
+# Change the whole data in 'Music.effects' column ('Improve' = 1, 'No effect' or 'Worsen' or blank is 0)
+mxmh_survey_results$Music.effects <- as.character(mxmh_survey_results$Music.effects)
+mxmh_survey_results$Music.effects[which[mxmh_survey_results$Music.effects == 'Improve']] <- 1
+mxmh_survey_results$Music.effects[which[mxmh_survey_results$Music.effects == 'No effect' || 
+                                          mxmh_survey_results$Music.effects == 'Worsen' || 
+                                          mxmh_survey_results$Music.effects == '']] <- 0
+```
