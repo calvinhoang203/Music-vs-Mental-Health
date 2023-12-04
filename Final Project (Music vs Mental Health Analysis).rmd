@@ -22,72 +22,19 @@ We aim to explore how different music genres impact mental health by analyzing r
 data <- read.csv('mxmh_survey_results.csv')
 head(data)
 ```
-
-# Libraries
-
 ```{r}
 require('tidyr')
 require('dplyr')
 require('ggplot2')
 ```
 
-# Analysis
+# Research and analysis on the dataset
 
 ```{r}
 # Top music favorite genres
 genre_counts <- table(data$Fav.genre)
 sorted_genres <- sort(genre_counts, decreasing = TRUE)
 sorted_genres
-```
-
-- As shown from the data above, the top 3 music that people listen to are Rock, Pop, Metal.
-
-- Next, we'll be analyzing how these genres affect people who listen to them.
-
-```{r}
-# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
-data$Anxiety = ifelse(data$Anxiety > 5, 1, 0)
-head(data)
-```
-
-```{r}
-sum(data$Music.effects == 'Improve') # number of people who find music improving their mood
-```
-
-```{r}
-# can investigate improvement in people who are not anxious + together if have room in paper
-# i.e. with ratio 2 + not sure how to do together lol
-#split data frame based on particular column value
-data_anxious <- data[data$Anxiety == 1, ]
-data_not_anxious <- data[data$Anxiety == 0, ]
-```
-
-```{r}
-head(data_anxious)
-```
-
-
-```{r}
-# CORRECT ratio1
-ratio1 <- sum(data_anxious$Music.effects == 'Improve') / sum(data$Anxiety == 1)
-ratio1
-```
-
-```{r}
-rel_freq_genre = table(data_anxious$Fav.genre) / length(data_anxious$Fav.genre)
-rel_freq_genre
-```
-
-```{r}
-sort(rel_freq_genre)
-```
-```{r}
-dimnames(sort(rel_freq_genre))
-```
-
-```{r}
-test <- as.vector(sort(rel_freq_genre))
-test
 ```
 
 ```{r}
@@ -99,13 +46,43 @@ lbls <- c('Latin', 'Gospel', 'Lofi', 'Rap',
           'Jazz', 'Country', 'K pop', 'R&B', 
           'EDM', 'Folk', 'Hip hop', 'Video game music',
           'Classical', 'Metal', 'Pop', 'Rock')
-pie(slices, labels = lbls, main="Favorite Genre")
+pie(slices, labels = lbls, main="Favorite Genres", radius = 1)
+```
+
+- As shown from the data above, the top 3 music that people listen to are Rock, Pop, Metal.
+
+- Next, we'll be analyzing how these genres affect people who listen to them.
+
+```{r}
+# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+data$Anxious = ifelse(data$Anxiety > 5, 1, 0)
+head(data)
+```
+
+```{r}
+# can investigate improvement in people who are not anxious + together if have room in paper
+# i.e. with ratio 2 + not sure how to do together lol
+# split data frame based on particular column value
+data_anxious <- data[data$Anxious == 1, ]
+data_not_anxious <- data[data$Anxious == 0, ]
+```
+
+```{r}
+head(data_anxious)
 ```
 
 
+# Non-linearity for the continuous variable
+# Regression
+# Correlation
+# Normalities
+# Looking at the significance in the dataset
+# AIC (to see how well the model fits the data)
+# Test violations (outliers and high leverage point)
+# Analysis and Conclusion
+# Code Appendix:
 
-```{r}
-# For the first part, only include people with anxiety > 5 so the ratio includes people who's mental health improved divided by number of people who are anxious
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
 ```
 
 
