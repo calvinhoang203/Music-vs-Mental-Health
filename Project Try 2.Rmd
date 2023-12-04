@@ -1,0 +1,50 @@
+---
+title: "Project Try 2"
+author: "Karen Nguyen"
+date: "2023-12-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Importing the dataset
+
+```{r}
+data <- read.csv('C:/Users/karen/Documents/STA141A/mxmh_survey_results.csv')
+attach(data)
+head(data)
+```
+
+# Libraries
+
+```{r}
+require('tidyr')
+require('dplyr')
+require('ggplot2')
+```
+
+# Making categories for Anxious, Depressed, and Insomniac
+```{r}
+# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+data$Anxious = ifelse(Anxiety > 5, 1, 0)
+# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+data$Depressed = ifelse(Depression > 5, 1, 0)
+# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+data$Insomniac = ifelse(Insomnia > 5, 1, 0)
+
+head(data)
+attach(data)
+```
+
+# Fitted model
+```{r}
+fitA <- lm(Hours.per.day ~ Age + Anxious + Depressed + Insomniac + Music.effects)
+summary(fitA)
+```
+```{r}
+fitB <- lm(Hours.per.day ~ Age + Anxious + Depressed + Insomniac + Music.effects)
+summary(fitB)
+```
+
