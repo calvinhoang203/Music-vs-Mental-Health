@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Executive Summary
 
-We aim to explore how different music genres impact mental health by analyzing relevant data. This will help us determine which genre is the most beneficial for mental health. We'll compare this to the amount of people suffering from certain mental conditions from each genre.
+We aim to explore how music impact mental health by analyzing relevant data. This will help us determine how music is the most beneficial for mental health. We'll compare this to the amount of people suffering from certain mental conditions.
 
 # Importing the dataset
 
@@ -27,49 +27,32 @@ require('tidyr')
 require('dplyr')
 require('ggplot2')
 ```
-
-# Research and analysis on the dataset
-
-```{r}
-# Top music favorite genres
-genre_counts <- table(data$Fav.genre)
-sorted_genres <- sort(genre_counts, decreasing = TRUE)
-sorted_genres
-```
-
-```{r}
-
-# Simple Pie Chart
-slices <- as.vector(sort(rel_freq_genre))
-#set labels as genre name
-lbls <- c('Latin', 'Gospel', 'Lofi', 'Rap',
-          'Jazz', 'Country', 'K pop', 'R&B', 
-          'EDM', 'Folk', 'Hip hop', 'Video game music',
-          'Classical', 'Metal', 'Pop', 'Rock')
-pie(slices, labels = lbls, main="Favorite Genres", radius = 1)
-```
-
-- As shown from the data above, the top 3 music that people listen to are Rock, Pop, Metal.
-
-- Next, we'll be analyzing how these genres affect people who listen to them.
+# Making categories for Anxious, Depressed, and Insomniac
 
 ```{r}
 # mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
 data$Anxious = ifelse(data$Anxiety > 5, 1, 0)
+# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+data$Depressed = ifelse(data$Depression > 5, 1, 0)
+# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+data$Insomniac = ifelse(data$Insomnia > 5, 1, 0)
+
 head(data)
+attach(data)
 ```
 
+# Fitted model
 ```{r}
-# can investigate improvement in people who are not anxious + together if have room in paper
-# i.e. with ratio 2 + not sure how to do together lol
-# split data frame based on particular column value
-data_anxious <- data[data$Anxious == 1, ]
-data_not_anxious <- data[data$Anxious == 0, ]
+fitA <- lm(Hours.per.day ~ Age + Anxious + Depressed + Insomniac + Music.effects)
+summary(fitA)
+```
+```{r}
+fitB <- lm(Hours.per.day ~ Age + Anxious + Depressed + Insomniac + Music.effects)
+summary(fitB)
 ```
 
-```{r}
-head(data_anxious)
-```
+
+
 
 
 # Non-linearity for the continuous variable
