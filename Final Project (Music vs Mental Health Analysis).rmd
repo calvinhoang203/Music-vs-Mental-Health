@@ -34,6 +34,17 @@ require('ggplot2')
 # Analysis
 
 ```{r}
+# Top music favorite genres
+genre_counts <- table(mxmh_survey_results$Fav.genre)
+sorted_genres <- sort(genre_counts, decreasing = TRUE)
+sorted_genres
+```
+
+- As shown from the data above, the top 3 music that people listen to are Rock, Pop, Metal.
+
+- Next, we'll be analyzing how these genres affect people who listen to them.
+
+```{r}
 # mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
 data$Anxiety = ifelse(data$Anxiety > 5, 1, 0)
 head(data)
@@ -43,22 +54,20 @@ head(data)
 sum(data$Music.effects == 'Improve') 
 ```
 
+```{r}
+# can investigate improvement in people who are not anxious + together if have room in paper
+# i.e. with ratio 2 + not sure how to do together lol
+#split data frame based on particular column value
+data_anxious <- data[data$Anxious == 1, ]
+data_not_anxious <- data[data$Anxious == 0, ]
+```
 
 ```{r}
-# Top music favorite genres
-genre_counts <- table(mxmh_survey_results$Fav.genre)
-sorted_genres <- sort(genre_counts, decreasing = TRUE)
-sorted_genres
+head(data_anxious)
 ```
 
 
-- As shown from the data above, the top 3 music that people listen to are Rock, Pop, Metal.
 
-
-```{r}
-mxmh_survey_results$Anxiety[which[mxmh_survey_results$Anxiety <= 5]] <- 0 # No anxiety is 0
-mxmh_survey_results$Anxiety[which[mxmh_survey_results$Anxiety > 5]] <- 1 # Anxiety is 1
-```
 ```{r}
 rock_data <- data[data[["Fav genre"]] == "Rock", c("Fav genre", "Music effects", "Anxiety", "Depression")]
 rock_indices <- which(data[["Fav genre"]] == "Rock")
