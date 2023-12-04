@@ -57,7 +57,7 @@ summary(fitB)
 
 # Non-linearity for the continuous variable
 # Regression
-# Correlation
+# Correlation (anova)
 # Normalities
 # Looking at the significance in the dataset
 # AIC (to see how well the model fits the data)
