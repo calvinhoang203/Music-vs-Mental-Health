@@ -44,6 +44,11 @@ mxmh_survey_results$Music.effects[which[mxmh_survey_results$Music.effects == 'No
                                           mxmh_survey_results$Music.effects == '']] <- 0
 ```
 
+```{r}
+mxmh_survey_results$Anxiety[which[mxmh_survey_results$Anxiety <= 5]] <- 0 # No anxiety is 0
+mxmh_survey_results$Anxiety[which[mxmh_survey_results$Anxiety > 5]] <- 1 # No anxiety is 0
+
+```
 
 
 
