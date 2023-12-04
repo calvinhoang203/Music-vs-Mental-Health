@@ -35,7 +35,7 @@ require('ggplot2')
 
 ```{r}
 # Top music favorite genres
-genre_counts <- table(mxmh_survey_results$Fav.genre)
+genre_counts <- table(data$Fav.genre)
 sorted_genres <- sort(genre_counts, decreasing = TRUE)
 sorted_genres
 ```
@@ -100,7 +100,6 @@ lbls <- c('Latin', 'Gospel', 'Lofi', 'Rap',
           'EDM', 'Folk', 'Hip hop', 'Video game music',
           'Classical', 'Metal', 'Pop', 'Rock')
 pie(slices, labels = lbls, main="Favorite Genre")
-     
 ```
 
 
