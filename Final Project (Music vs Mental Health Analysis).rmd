@@ -1,0 +1,91 @@
+---
+title: "Final Project: Music vs Mental Health Analysis"
+author: "Calvin, Vy, Karen"
+date: "December 2, 2023"
+output: pdf_document
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Executive Summary
+
+We aim to explore how different music genres impact mental health by analyzing relevant data. This will help us determine which genre is the most beneficial for mental health. We'll compare this to the amount of people suffering from certain mental conditions from each genre.
+
+# Importing the dataset
+
+```{r}
+data <- read.csv('mxmh_survey_results.csv')
+head(data)
+```
+
+# Libraries
+
+```{r}
+require('tidyr')
+require('dplyr')
+require('ggplot2')
+```
+
+# Analysis
+
+```{r}
+# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+data$Anxiety = ifelse(data$Anxiety > 5, 1, 0)
+head(data)
+```
+
+```{r}
+sum(data$Music.effects == 'Improve') 
+```
+
+
+```{r}
+# Top music favorite genres
+genre_counts <- table(mxmh_survey_results$Fav.genre)
+sorted_genres <- sort(genre_counts, decreasing = TRUE)
+sorted_genres
+```
+
+
+- As shown from the data above, the top 3 music that people listen to are Rock, Pop, Metal.
+
+
+```{r}
+mxmh_survey_results$Anxiety[which[mxmh_survey_results$Anxiety <= 5]] <- 0 # No anxiety is 0
+mxmh_survey_results$Anxiety[which[mxmh_survey_results$Anxiety > 5]] <- 1 # Anxiety is 1
+```
+```{r}
+rock_data <- data[data[["Fav genre"]] == "Rock", c("Fav genre", "Music effects", "Anxiety", "Depression")]
+rock_indices <- which(data[["Fav genre"]] == "Rock")
+rock_data <- data[data[["Fav genre"]] == "Rock", c("Fav genre", "Music effects", "Anxiety", "Depression")]
+rock_data$Index <- rock_indices
+#print(rock_data)
+tail(rock_data)
+```
+
+```{r}
+# CORRECT ratio1
+ratio1 <- sum(data_anxious$Music.effects == 'Improve') / sum(data$Anxious == 1)
+ratio1
+```
+
+```{r}
+# For the first part, only include people with anxiety > 5 so the ratio includes people who's mental health improved divided by number of people who are anxious
+```
+
+
+
+
+
+
+
+
+
+
+
+
