@@ -1,0 +1,147 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+Importing data
+```{r}
+library(readr)
+data <- read_csv("~/Desktop/R- Script Folder/STA 141A/Music_data.csv")
+head(data)
+print(colnames(data))
+```
+
+
+```{r}
+Rock_Improve = list()
+Rock_No_Effect = list()
+Rock_Worsen = list()
+
+
+fav_gene <- data[["Fav genre"]]
+music_effect <- data[["Music effects"]]
+
+for (i in 1:length(fav_gene)) {
+  if (!is.na(fav_gene[i]) && !is.na(music_effect[i])) {
+    if (fav_gene[i] == "Rock") {
+      if (music_effect[i] == "Improve") {
+        Rock_Improve <- append(Rock_Improve, list(i))
+      } else if (music_effect[i] == "No Effect") {
+        Rock_No_Effect <- append(Rock_No_Effect, list(i))
+      } else if (music_effect[i] == "Worsen") {
+        Rock_Worsen <- append(Rock_Worsen, list(i))
+      }
+    }
+  }
+}
+
+print(length(Rock_Improve))
+```
+
+
+```{r}
+rock_indices <- which(data[["Fav genre"]] == "Rock")
+rock_data <- data[data[["Fav genre"]] == "Rock", c("Fav genre", "Music effects", "Anxiety", "Depression")]
+rock_data$Index <- rock_indices
+#print(rock_data)
+tail(rock_data)
+```
+
+Creating Ratio (Music Effect/ Axiety)
+```{r}
+#print(rock_data[["Music effects"]] )
+```
+
+
+
+```{r}
+#print(rock_data[["Music effects"]])
+#rock_data[["Music effects"]] <- ifelse(rock_data[["Music effects"]] == "Improve", 1, 0)
+
+count_improvement = 0 
+
+for (i in 1:length(rock_data[["Music effects"]])) {
+  if (is.na(rock_data[["Music effects"]][i])) {
+    rock_data[["Music effects"]][i] <- 0
+  } else if (rock_data[["Music effects"]][i] == "Improve") {
+    rock_data[["Music effects"]][i] <- 1
+    count_improvement = count_improvement + 1
+  } else {
+    rock_data[["Music effects"]][i] <- 0
+  }
+}
+
+print(rock_data[["Music effects"]])
+print(count_improvement)
+```
+
+
+```{r}
+count_Anxiety = 0 
+i = 0 
+for (i in 1:length(rock_data[["Anxiety"]])) {
+  if (rock_data[["Anxiety"]][i] <= 5) {
+    rock_data[["Anxiety"]][i] <- 0
+  } else {
+    rock_data[["Anxiety"]][i] <- 1
+    count_Anxiety = count_Anxiety + 1
+  }
+}
+
+print(rock_data[["Anxiety"]])
+print(count_Anxiety)
+```
+
+
+```{r}
+rock_data[["Music effects"]] <- as.numeric(rock_data[["Music effects"]])
+rock_data[["Anxiety"]] <- as.numeric(rock_data[["Anxiety"]])
+
+
+```
+
+```{r}
+ratio_anxiety = sum(rock_data[["Music effects"]])/ sum(rock_data[["Anxiety"]])
+print(ratio_anxiety)
+
+## 
+#SUDO CODE: 
+#- Poeple who are anciety are greater than 5 
+#- Make data frama for those poeple
+#- Then from those people, look at people who "imrpove"
+# improve/sum(anxiety)
+
+```
+
+```{r}
+count_Depression = 0 
+i = 0 
+for (i in 1:length(rock_data[["Depression"]])) {
+  if (rock_data[["Depression"]][i] < 5) {
+    rock_data[["Depression"]][i] <- 0
+  } else {
+    rock_data[["Depression"]][i] <- 1
+    count_Depression = count_Depression + 1
+  }
+}
+
+print(rock_data[["Depression"]])
+print(count_Depression)
+```
+
+
+```{r}
+rock_data[["Music effects"]] <- as.numeric(rock_data[["Music effects"]])
+rock_data[["Depression"]] <- as.numeric(rock_data[["Depression"]])
+
+
+```
+
+```{r}
+ratio_depression = sum(rock_data[["Music effects"]])/ sum(rock_data[["Depression"]])
+print(ratio_depression)
+```
+
+
