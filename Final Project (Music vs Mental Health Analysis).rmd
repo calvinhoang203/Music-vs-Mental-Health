@@ -41,28 +41,109 @@ head(data)
 attach(data)
 ```
 
+# Testing Non-linearity
+
+We don't need to test for non-linearity for categorical variables so we will only test for non-linearity on the continuous variables, namely age.
+```{r}
+ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, Age)) + 
+    theme_minimal() + geom_point() + facet_wrap('name', scales = 'free')
+```
+Plotting the covariate age against hours per day, it doesn't seem that there is a linear relationship between the 2.
+To try to fix this, let's take the log of age.
+With log age:
+```{r}
+ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, log(Age))) + 
+    theme_minimal() + geom_point() + facet_wrap('name', scales = 'free')
+```
 # Fitted model
-```{r}
-fitA <- lm(Hours.per.day ~ Age + Anxious + Depressed + Insomniac + Music.effects)
+```{r, echo = FALSE}
+fitA <- lm(data$Hours.per.day ~ data$Age + data$Anxious + data$Depressed + data$Insomniac + data$Music.effects)
 summary(fitA)
+
+
+par(mfrow = c(2,2))
+plot(fitA)
+
+
+```
+FitA is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitA does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be many outliers.
+
+
+```{r,echo = FALSE}
+fitB <- lm(data$Hours.per.day ~ data$Depressed + data$Insomniac )
+summary(fitB)
+
+par(mfrow = c(2,2))
+plot(fitB)
+
+
+```
+FitB is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitB does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be many outliers.
+
+
+```{r,echo = FALSE}
+fitC <- lm(data$Hours.per.day ~ data$Age + data$Anxious )
+summary(fitC)
+
+
+par(mfrow = c(2,2))
+plot(fitC)
+```
+FitC is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitC does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be many outliers.The outliers can be clearly seen in Residuals vs Leverage plot where point 696 is outside of the Cookline.
+
+```{r,echo = FALSE}
+
+fitD <- lm(data$Hours.per.day ~ data$Anxious + data$Depressed + data$Insomniac)
+summary(fitD)
+
+par(mfrow = c(2,2))
+plot(fitD)
+```
+FitC is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitC does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be possible outliers.
+
+
+```{r,echo = FALSE}
+fitE <- lm(data$Hours.per.day ~ -1 + data$Age + data$Anxious + data$Depressed + data$Insomniac + data$Music.effects)
+summary(fitE)
+
+par(mfrow = c(2,2))
+plot(fitE)
 ```
 ```{r}
-fitB <- lm(Hours.per.day ~ Age + Anxious + Depressed + Insomniac + Music.effects)
-summary(fitB)
+anova_result <- anova(fitA, fitE, test = "LRT")
+anova_result
 ```
 
 
+# ANOVA test
+```{r}
+anova(fitA, fitE)
+```
+# AIC
+```{r}
+AIC(fitA)
+AIC(fitB)
+AIC(fitC)
+AIC(fitD)
+AIC(fitE)
+```
+# BIC
+```{r}
+BIC(fitA)
+BIC(fitB)
+BIC(fitC)
+BIC(fitD)
+BIC(fitE)
+```
+- fitB has the best fit according to AIC and BIC because it has the lowest AIC and BIC.
+- For the AIC, fitA, fitB, and fitE have very similar AICs but, as noted, fitB has the lowest.
 
 
 
-# Non-linearity for the continuous variable
-# Regression
-# Correlation (anova)
-# Normalities
-# Looking at the significance in the dataset
-# AIC (to see how well the model fits the data)
-# Test violations (outliers and high leverage point)
 # Analysis and Conclusion
+
+
+
 # Code Appendix:
 
 ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
