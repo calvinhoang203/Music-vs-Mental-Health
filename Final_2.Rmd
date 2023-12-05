@@ -1,0 +1,101 @@
+---
+title: "Project Try 2"
+author: "null"
+date: "2023-12-04"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Importing the dataset
+
+```{r,echo = FALSE}
+data <- read.csv("~/Desktop/R- Script Folder/STA 141A/Music_data.csv")
+attach(data)
+head(data)
+```
+
+# Libraries
+
+```{r,echo = FALSE}
+require('tidyr')
+require('dplyr')
+require('ggplot2')
+```
+
+# Making categories for Anxious, Depressed, and Insomniac
+```{r,echo = FALSE}
+# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+data$Anxious = ifelse(Anxiety > 5, 1, 0)
+# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+data$Depressed = ifelse(Depression > 5, 1, 0)
+# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+data$Insomniac = ifelse(Insomnia > 5, 1, 0)
+
+head(data)
+
+```
+
+# Fitted model
+```{r,echo = FALSE}
+fitA <- lm(data$Hours.per.day ~ data$Age + data$Anxious + data$Depressed + data$Insomniac + data$Music.effects)
+summary(fitA)
+
+
+par(mfrow = c(2,2))
+plot(fitA)
+
+
+```
+FitA is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitA does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be many outliers.
+
+
+```{r,echo = FALSE}
+fitB <- lm(data$Hours.per.day ~ data$Depressed + data$Insomniac )
+summary(fitB)
+
+par(mfrow = c(2,2))
+plot(fitB)
+
+
+```
+FitB is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitB does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be many outliers.
+
+
+```{r,echo = FALSE}
+fitC <- lm(data$Hours.per.day ~ data$Age + data$Anxious )
+summary(fitC)
+
+
+par(mfrow = c(2,2))
+plot(fitC)
+```
+FitC is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitC does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be many outliers.The outliers can be clearly seen in Residuals vs Leverage plot where point 696 is outside of the Cookline.
+
+```{r,echo = FALSE}
+
+fitD <- lm(data$Hours.per.day ~ data$Anxious + data$Depressed + data$Insomniac)
+summary(fitD)
+
+par(mfrow = c(2,2))
+plot(fitD)
+```
+FitC is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitC does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be possible outliers.
+
+
+```{r,echo = FALSE}
+fitE <- lm(data$Hours.per.day ~ -1 + data$Age + data$Anxious + data$Depressed + data$Insomniac + data$Music.effects )
+summary(fitE)
+
+par(mfrow = c(2,2))
+plot(fitE)
+```
+```{r}
+anova_result <- anova(fitA, fitE, test = "LRT")
+anova_result
+```
+
