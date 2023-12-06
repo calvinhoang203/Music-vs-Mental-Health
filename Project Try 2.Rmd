@@ -29,17 +29,19 @@ require('ggplot2')
 ```{r}
 # mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
 data$Anxious = ifelse(Anxiety > 5, 1, 0)
-# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+# mark people as depressed (1) if depression > 5, not depressed (0) otherwise
 data$Depressed = ifelse(Depression > 5, 1, 0)
-# mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
+# mark people as insomniac (1) if insomnia > 5, not insomniac (0) otherwise
 data$Insomniac = ifelse(Insomnia > 5, 1, 0)
+# mark people as having ocd (1) if ocd > 5, not having ocd (0) otherwise
+data$ocd = ifelse(OCD > 5, 1, 0)
 
 head(data)
 attach(data)
 ```
 # Testing Non-linearity
 
-We don't need to test for non-linearity for categorical variables so we will only test for non-linearity on the continuous variables, namely age.
+We don't need to test for non-linearity for categorical variables so we will only test for non-linearity for the continuous variables, namely age.
 ```{r}
 ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, Age)) + 
     theme_minimal() + geom_point() + facet_wrap('name', scales = 'free')
@@ -48,15 +50,50 @@ Plotting the covariate age against hours per day, it doesn't seem that there is 
 To try to fix this, let's take the log of age.
 With log age:
 ```{r}
+# log transform because there are a few high values and many low values
 ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, log(Age))) + 
     theme_minimal() + geom_point() + facet_wrap('name', scales = 'free')
 ```
+```{r}
+hist(Hours.per.day)
+# Hours per day is not normal so we can log transform it or use gamma glm
+```
+Since the hours per day that people listen to music is not normally distributed, for each of the models, we will have a model where we log Hours.per.day and a model where we fit it to a log-link Gamma distribution.
 
 # Fitted models
+
 ```{r}
-fitA <- lm(Hours.per.day ~ Age + Anxious + Depressed + Insomniac + Music.effects)
-summary(fitA)
+fitAlog <- lm(log(Hours.per.day + 1) ~ log(Age) + While.working + Anxious + Depressed + Insomniac + ocd + Music.effects)
+summary(fitAlog)
+
+# we can add more variables if we want to for A
+# have as many fits as long as the models make sense 
+# we can see if these fits are similar in analysis
+
+fitAgamma <- glm(Hours.per.day + 1 ~ Age + Anxious + Depressed + Insomniac + Music.effects, family = Gamma (link = 'log'))
+summary(fitAgamma)
 ```
+
+```{r}
+plot(fitA)
+```
+
+```{r}
+plot(fitAgamma)
+```
+
+```{r}
+#Residual analysis
+df <- data.frame(
+    x = resid(fitAgamma, 'deviance'),
+    group = rep("A"), each = nrow(data)
+)
+ggplot(df, aes(sample = x)) + 
+    theme_minimal() + geom_qq() + 
+    geom_abline(slope = 1, intercept = 0, color = 'red')
+```
+
+
 ```{r}
 fitB <- lm(Hours.per.day ~ Depressed + Insomniac)
 summary(fitB)
@@ -76,11 +113,48 @@ summary(fitD)
 #fitA without intercept
 fitE <- lm(Hours.per.day ~ -1 + Age + Anxious + Depressed + Insomniac + Music.effects)
 summary(fitE)
+ 
+
 ```
+
+# Plots of fitted models
+
+
+
+fitA:
+```{r}
+par(mfrow = c(2,2))
+plot(fitA)
+```
+
+fitB:
+```{r}
+par(mfrow = c(2,2))
+plot(fitB)
+```
+
+fitC:
+```{r}
+par(mfrow = c(2,2))
+plot(fitC)
+```
+
+fitD:
+```{r}
+par(mfrow = c(2,2))
+plot(fitD)
+```
+
+fitE:
+```{r}
+par(mfrow = c(2,2))
+plot(fitE)
+```
+
 
 # ANOVA test
 ```{r}
-anova(fitA, fitE)
+anova(fitAold, fitE)
 ```
 # AIC
 ```{r}
