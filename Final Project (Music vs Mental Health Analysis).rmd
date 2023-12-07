@@ -6,8 +6,8 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-knitr::opts_chunk$set(fig.width = 11, fig.height = 6)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center')
+#knitr::opts_chunk$set(fig.width = 12, fig.height = 6)
 ```
 
 
@@ -80,7 +80,7 @@ The relationship between log(Age) and log(Hours.per.day + 1) is not obviously no
 
 Since the hours per day that people listen to music is not normally distributed, we created two fits, one where we log Hours.per.day and the other where we fit it to a log-link Gamma distribution.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.width = 11, fig.height = 6}
 # fitA where we log Hours.per.day + 1 since Hours.per.day is not normally distributed.
 fitAlog <- lm(log(Hours.per.day + 1) ~ log(Age) + Anxious + Depressed + Insomniac + Music.effects)
 summary(fitAlog)
@@ -90,7 +90,7 @@ par(mfrow = c(1,2))
 plot(fitAlog, which = c(1,2))
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.width = 11, fig.height = 6}
 # fitA where it's fitted to a gamma distribution
 # For both fitAlog and fitAgamma, we add 1 to Hours.per.day because we can't log zero.
 fitAgamma <- glm(Hours.per.day + 1~ log(Age) + Anxious + Depressed + Insomniac + Music.effects,
@@ -103,11 +103,11 @@ plot(fitAgamma, which = c(1,2))
 ```
 Analysis:
 
-  - For Log: From looking at the Residual Vs Fitted plot for fitA_log, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitA_log does have constant variance. However, there are possible outliers such as point 696 or 19. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. However, there are still evidences of outliers. 
+  - For Log: From looking at the Residual Vs Fitted plot for fitA_log, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitA_log does have constant variance. However, there are possible outliers such as point 696 or 19. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers. 
 
-  - For Gamma: Since the distribution is Gamma, it is possible to have cluster up negatively value in Residuals and Fitted. This means that fitA_gamma, doesn't seem to violating normality assumption. In another word, fitA_gamma have a constant Variance. However, there are possible outliers such as points 696 or 19. For Normal Q-Q, Gamma violated normality assumption because errors points are going off the normal line.
+  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that fitA_gamma, doesn't seem to violate normality assumption. In another word, fitA_gamma have a constant Variance. However, there are possible outliers such as points 696 or 19. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.width = 11, fig.height = 6}
 # log Hours.per.day +1
 fitBlog <- lm(log(Hours.per.day + 1) ~ log(Age) + Depressed + Insomniac)
 summary(fitBlog)
@@ -117,7 +117,7 @@ par(mfrow = c(1,2))
 plot(fitBlog, which = c(1,2))
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.width = 11, fig.height = 6}
 # gamma glm
 fitBgamma <- glm(Hours.per.day + 1 ~ log(Age) + Depressed + Insomniac,
                  family = Gamma (link = 'log'))
@@ -129,9 +129,9 @@ plot(fitBgamma, which = c(1,2))
 ```
 Analysis:
 
-  - For Log: From looking at the Residual Vs Fitted plot for fitA_log, it seem that normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitA_log does have constant variance. However, there is possible outliers such as point 696 or 19. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. However, there is still evidences of outliers. 
+  - For Log: From looking at the Residual Vs Fitted plot for fitB_log, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitB_log does have constant variance. However, there are possible outliers such as point 696 or 19. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers. 
 
-  - For Gamma: Since the distribution is Gamma, it is possible to have cluster up negatively value in Residuals and Fitted. This means that fitA_gamma, doesn't seem to violating normality assumption. In another word, fitA_gamma have a constant Variance. However, there are possible outliers such as points 696 or 19. For Normal Q-Q, Gamma violated normality assumption because errors points are going off the normal line.
+  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that fitB_gamma, doesn't seem to violate normality assumption. In another word, fitA_gamma have a constant Variance. However, there are possible outliers such as points 696 or 19. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
 
 # AIC
 ```{r, echo = FALSE}
@@ -150,11 +150,11 @@ BIC(fitBlog)
 BIC(fitAgamma)
 BIC(fitBgamma)
 ```
-fitAlog is a better fit than fitBlog according to AIC because it has a lower AIC.
-fitBlog is a better fit than fitAlog according to BIC because it has a lower BIC.
+- fitAlog is a better fit than fitBlog according to AIC because it has a lower AIC.
+- fitBlog is a better fit than fitAlog according to BIC because it has a lower BIC.
 
-fitAgamma is a better fit than fitBgamma according to AIC because it has a lower AIC.
-fitBgamma is a better fit than fitAgamma according to BIC because it has a lower BIC.
+- fitAgamma is a better fit than fitBgamma according to AIC because it has a lower AIC.
+- fitBgamma is a better fit than fitAgamma according to BIC because it has a lower BIC.
 
 
 
