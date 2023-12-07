@@ -1,5 +1,5 @@
 ---
-title: "Project Try 2"
+title: "Music vs. Mental Health"
 author: "Karen Nguyen"
 date: "2023-12-04"
 output:
@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center')
 ```
 
 ```{r, echo = FALSE, results = FALSE}
@@ -27,9 +27,13 @@ require('dplyr')
 require('ggplot2')
 ```
 
-# Making categories for Anxiety, Depression, Insomnia, and OCD.
+# Introduction
 
-Since our data had people rate their anxiety, depression, insomnia, and OCD and a scale of 1 to 10 (only integers), we will make categories for `Anxiety`, `Depression`, `Insomnia`, and `OCD` so that the categories will be binary. For example, for `Anxiety`, we will have a category called `Anxious` that is 1 if `Anxiety` > 5 and 0 otherwise.
+In this project, we will look to see if there is a relationship between how many hours per day someone listens to music and their age and mental health. To do this, we used [data collected from a music and mental health survey](https://www.kaggle.com/code/laurenlavelle/mental-health-and-music-analysis/input).
+
+# Making categories for Anxiety, Depression, and Insomnia
+
+Since our data had people rate their anxiety, depression, and insomnia on a scale of 1 to 10 (only integers), we will make categories for `Anxiety`, `Depression`, and `Insomnia` so that the categories will be binary. For example, for `Anxiety`, we will have a category called `Anxious` that is 1 if `Anxiety` > 5 and 0 otherwise.
 ```{r, echo = FALSE, results= FALSE, message=FALSE}
 # mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
 data$Anxious = ifelse(Anxiety > 5, 1, 0)
@@ -37,8 +41,6 @@ data$Anxious = ifelse(Anxiety > 5, 1, 0)
 data$Depressed = ifelse(Depression > 5, 1, 0)
 # mark people as insomniac (1) if insomnia > 5, not insomniac (0) otherwise
 data$Insomniac = ifelse(Insomnia > 5, 1, 0)
-# mark people as having ocd (1) if ocd > 5, not having ocd (0) otherwise
-data$ocd = ifelse(OCD > 5, 1, 0)
 
 head(data)
 attach(data)
@@ -63,25 +65,21 @@ hist(Hours.per.day)
 ```
 Since the hours per day that people listen to music is not normally distributed, for each of the models, we will have a model where we log Hours.per.day and a model where we fit it to a log-link Gamma distribution.
 
-Also, since half our models will have log Hours.per.day, we should look also look to see if log(Age) and log(Hours.per.day  + 1).
-```{r, echo = FALSE, warning = FALSE}
+Also, since half our models will have log Hours.per.day, we check if the relationship with log(Age) and log(Hours.per.day  + 1) is linear.
+```{r, echo = FALSE}
 # log transform because there are a few high values and many low values
 ggplot(pivot_longer(data = data, 2), aes(log(Hours.per.day + 1), log(Age))) + labs(title = 'log(Age) vs. log(Hours per day + 1') +
     theme_minimal() + geom_point()
 ```
-The relationship between log(Age) and log(Hours.per.day + 1) is not obviously non-linear.
+The relationship between log(Age) and log(Hours.per.day + 1) is not obviously non-linear, so we can use log(Age) in the linear model with log(Hours.per.day + 1).
 
 # Fitted models
 
-```{r, echo = FALSE}
-# DELETE LATER
-# we can add more variables if we want to for A
-# have as many fits as long as the models make sense 
-# we can see if these fits are similar in analysis
-```
+For fitA, which will have a log model, `fitAlog`, and a gamma generalized linear model (glm), `fitAgamma`, with covariates `log(Age)`,`Anxious`, `Depressed`, `Insomniac`, and `Music.effects`.  
+`Anxious`, `Depressed`, and `Insomniac` are the binary categories we made earlier.  
+`Music.effects` is a categorical variable in which people reported what effect they felt music had on their mental health. The categories for `Music.effects` are `Improve`, `No effect`, and `Worsen`.
 
-
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.width = 11, fig.height = 6}
 # fitA where we log Hours.per.day + 1 since Hours.per.day is not normally distributed.
 fitAlog <- lm(log(Hours.per.day + 1) ~ log(Age) + Anxious + Depressed + Insomniac + Music.effects)
 summary(fitAlog)
@@ -91,7 +89,7 @@ par(mfrow = c(1,2))
 plot(fitAlog, which = c(1,2))
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.width = 11, fig.height = 6}
 # fitA where it's fitted to a gamma distribution
 # For both fitAlog and fitAgamma, we add 1 to Hours.per.day because we can't log zero.
 fitAgamma <- glm(Hours.per.day + 1~ log(Age) + Anxious + Depressed + Insomniac + Music.effects,
@@ -102,10 +100,10 @@ summary(fitAgamma)
 par(mfrow = c(1,2))
 plot(fitAgamma, which = c(1,2))
 ```
-fitB <- lm(Hours.per.day ~ log(Age) + Depressed + Insomniac)
-summary(fitB)
 
-```{r, echo = FALSE}
+For the fitB's, `fitBlog` and `fitBgamma`, we used only the covariates that were individually significant in `fitA` and `fitAgamma`. As a result, the covariates for `fitBlog` and `fitBgamma` are `log(Age)`, `Depressed`, and `Insomniac`.
+
+```{r, echo = FALSE, fig.width = 11, fig.height = 6}
 # log Hours.per.day +1
 fitBlog <- lm(log(Hours.per.day + 1) ~ log(Age) + Depressed + Insomniac)
 summary(fitBlog)
@@ -115,7 +113,7 @@ par(mfrow = c(1,2))
 plot(fitBlog, which = c(1,2))
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.width = 11, fig.height = 6}
 # gamma glm
 fitBgamma <- glm(Hours.per.day + 1 ~ log(Age) + Depressed + Insomniac,
                  family = Gamma (link = 'log'))
@@ -125,23 +123,36 @@ summary(fitBgamma)
 par(mfrow = c(1,2))
 plot(fitBgamma, which = c(1,2))
 ```
+
 # AIC
-```{r, echo = FALSE}
+```{r, echo = FALSE, results = FALSE}
 AIC(fitAlog)
 AIC(fitBlog)
 
 AIC(fitAgamma)
 AIC(fitBgamma)
 ```
+AIC(fitAlog) = `r AIC(fitAlog)`   
+AIC(fitBlog) = `r AIC(fitBlog)`  
+
+AIC(fitAgamma) = `r AIC(fitAgamma)`  
+AIC(fitBgamma) = `r AIC(fitBgamma)`
 
 # BIC
-```{r, echo = FALSE}
+```{r, echo = FALSE, results = FALSE}
 BIC(fitAlog)
 BIC(fitBlog)
 
 BIC(fitAgamma)
 BIC(fitBgamma)
 ```
+BIC(fitAlog) = `r BIC(fitAlog)`   
+BIC(fitBlog) = `r BIC(fitBlog)`  
+
+BIC(fitAgamma) = `r BIC(fitAgamma)`  
+BIC(fitBgamma) = `r BIC(fitBgamma)`  
+
+# AIC and BIC analysis
 fitAlog is a better fit than fitBlog according to AIC because it has a lower AIC.
 fitBlog is a better fit than fitAlog according to BIC because it has a lower BIC.
 
