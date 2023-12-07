@@ -42,26 +42,35 @@ head(data)
 
 # Fitted model
 ```{r,echo = FALSE}
-fitA <- lm(data$Hours.per.day ~ data$Age + data$Anxious + data$Depressed + data$Insomniac + data$Music.effects)
-summary(fitA)
+fitA_log <- lm(log(data$Hours.per.day + 1)~ log(data$Age) + data$Anxious + data$Depressed + data$Insomniac + data$Music.effects)
+summary(fitA_log)
 
 
-par(mfrow = c(2,2))
-plot(fitA)
+
+fitA_gamma <- glm(data$Hours.per.day + 1~ log(data$Age) + data$Anxious + data$Depressed + data$Insomniac + data$Music.effects, family = Gamma(link = "log"))
+
+summary (fitA_gamma)
+
+
+
+par(mfrow = c(1,2))
+plot(fitA_log, which=c(2,1))
+plot(fitA_gamma, which=c(2,1))
 
 
 ```
-FitA is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitA does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be many outliers.
+For Log:From looking at the Residual Vs Fitted plot for fitA_log, it seem that normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitA_log does have constant variance. However, is there possible outliers such as point 696 or 19. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Noticeability, there is still evidences of outliers. 
+
+For Gamma: Since the distribution is Gamma, it is possible to have cluster up negatively value in Residuals and Fitted. This means that fitA_gamma, doesn't seem to violating normality assumption. In another word, fitA_gamma have a constant Variance. However, there are possible outliers such as points 696 or 19. For Normal Q-Q, Gamma violated normality assumption because errors points are going off the normal line.
 
 
 ```{r,echo = FALSE}
 fitB <- lm(data$Hours.per.day ~ data$Depressed + data$Insomniac )
 summary(fitB)
 
-par(mfrow = c(2,2))
-plot(fitB)
 
-
+par(mfrow = c(1,2))
+plot(fitB, which=c(2,1))
 ```
 FitB is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitB does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be many outliers.
 
@@ -71,8 +80,8 @@ fitC <- lm(data$Hours.per.day ~ data$Age + data$Anxious )
 summary(fitC)
 
 
-par(mfrow = c(2,2))
-plot(fitC)
+par(mfrow = c(1,2))
+plot(fitC, which=c(2,1))
 ```
 FitC is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitC does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be many outliers.The outliers can be clearly seen in Residuals vs Leverage plot where point 696 is outside of the Cookline.
 
@@ -81,8 +90,8 @@ FitC is not normal as shown in the Q-Q Plot where the error points are rising of
 fitD <- lm(data$Hours.per.day ~ data$Anxious + data$Depressed + data$Insomniac)
 summary(fitD)
 
-par(mfrow = c(2,2))
-plot(fitD)
+par(mfrow = c(1,2))
+plot(fitD, which=c(2,1))
 ```
 FitC is not normal as shown in the Q-Q Plot where the error points are rising off the normal line which show a right skew. Additionally, FitC does have a constant variance which was evident in Residual VS Fitted plot where there is no clear pattern however, there appear to be possible outliers.
 
@@ -91,11 +100,16 @@ FitC is not normal as shown in the Q-Q Plot where the error points are rising of
 fitE <- lm(data$Hours.per.day ~ -1 + data$Age + data$Anxious + data$Depressed + data$Insomniac + data$Music.effects )
 summary(fitE)
 
-par(mfrow = c(2,2))
-plot(fitE)
+
+par(mfrow = c(1,2))
+plot(fitE, which=c(2,1))
 ```
 ```{r}
-anova_result <- anova(fitA, fitE, test = "LRT")
-anova_result
+#anova_result <- anova(fitA, fitE, test = "LRT")
+#anova_result
 ```
+
+
+
+Analysis: Since the hours per day that people listen to music is not normally distributed, we created two fits, one where we log Hours.per.day and the other where we fit it to a log-link Gamma distribution.
 
