@@ -2,31 +2,35 @@
 title: "Project Try 2"
 author: "Karen Nguyen"
 date: "2023-12-04"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r, echo = FALSE, results = FALSE}
 # Importing the dataset
 
-```{r}
 data <- read.csv('C:/Users/karen/Documents/STA141A/mxmh_survey_results.csv')
 attach(data)
 head(data)
 ```
 
+```{r, echo = FALSE, message = FALSE}
 # Libraries
 
-```{r}
 require('tidyr')
 require('dplyr')
 require('ggplot2')
 ```
 
-# Making categories for Anxious, Depressed, and Insomniac
-```{r}
+# Making categories for Anxiety, Depression, Insomnia, and OCD.
+
+Since our data had people rate their anxiety, depression, insomnia, and OCD and a scale of 1 to 10 (only integers), we will make categories for `Anxiety`, `Depression`, `Insomnia`, and `OCD` so that the categories will be binary. For example, for `Anxiety`, we will have a category called `Anxious` that is 1 if `Anxiety` > 5 and 0 otherwise.
+```{r, echo = FALSE, results= FALSE, message=FALSE}
 # mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
 data$Anxious = ifelse(Anxiety > 5, 1, 0)
 # mark people as depressed (1) if depression > 5, not depressed (0) otherwise
@@ -42,137 +46,104 @@ attach(data)
 # Testing Non-linearity
 
 We don't need to test for non-linearity for categorical variables so we will only test for non-linearity for the continuous variables, namely age.
-```{r}
-ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, Age)) + 
-    theme_minimal() + geom_point() + facet_wrap('name', scales = 'free')
+```{r, echo = FALSE, warning = FALSE}
+ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, Age)) + labs(title = 'Age vs. Hours per day') +
+    theme_minimal() + geom_point()
 ```
-Plotting the covariate age against hours per day, it doesn't seem that there is a linear relationship between the 2.
-To try to fix this, let's take the log of age.
+There doesn't seem to be a linear relationship between age and hours per day. We can transform age by logging it so that the relationship looks less non-linear.
 With log age:
-```{r}
+```{r, echo = FALSE, warning = FALSE}
 # log transform because there are a few high values and many low values
-ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, log(Age))) + 
-    theme_minimal() + geom_point() + facet_wrap('name', scales = 'free')
+ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, log(Age))) + labs(title = 'log(Age) vs. Hours per day') +
+    theme_minimal() + geom_point()
 ```
-```{r}
+```{r, echo = FALSE}
 hist(Hours.per.day)
 # Hours per day is not normal so we can log transform it or use gamma glm
 ```
 Since the hours per day that people listen to music is not normally distributed, for each of the models, we will have a model where we log Hours.per.day and a model where we fit it to a log-link Gamma distribution.
 
+Also, since half our models will have log Hours.per.day, we should look also look to see if log(Age) and log(Hours.per.day  + 1).
+```{r, echo = FALSE, warning = FALSE}
+# log transform because there are a few high values and many low values
+ggplot(pivot_longer(data = data, 2), aes(log(Hours.per.day + 1), log(Age))) + labs(title = 'log(Age) vs. log(Hours per day + 1') +
+    theme_minimal() + geom_point()
+```
+The relationship between log(Age) and log(Hours.per.day + 1) is not obviously non-linear.
+
 # Fitted models
 
-```{r}
-fitAlog <- lm(log(Hours.per.day + 1) ~ log(Age) + While.working + Anxious + Depressed + Insomniac + ocd + Music.effects)
-summary(fitAlog)
-
+```{r, echo = FALSE}
+# DELETE LATER
 # we can add more variables if we want to for A
 # have as many fits as long as the models make sense 
 # we can see if these fits are similar in analysis
+```
 
-fitAgamma <- glm(Hours.per.day + 1 ~ Age + Anxious + Depressed + Insomniac + Music.effects, family = Gamma (link = 'log'))
+
+```{r, echo = FALSE}
+# fitA where we log Hours.per.day + 1 since Hours.per.day is not normally distributed.
+fitAlog <- lm(log(Hours.per.day + 1) ~ log(Age) + Anxious + Depressed + Insomniac + Music.effects)
+summary(fitAlog)
+
+# Residuals vs. Fitted Values Plot and QQ Plot
+par(mfrow = c(1,2))
+plot(fitAlog, which = c(1,2))
+```
+
+```{r, echo = FALSE}
+# fitA where it's fitted to a gamma distribution
+# For both fitAlog and fitAgamma, we add 1 to Hours.per.day because we can't log zero.
+fitAgamma <- glm(Hours.per.day + 1~ log(Age) + Anxious + Depressed + Insomniac + Music.effects,
+                 family = Gamma (link = 'log'))
 summary(fitAgamma)
+
+# Residuals vs. Fitted Values Plot and QQ Plot
+par(mfrow = c(1,2))
+plot(fitAgamma, which = c(1,2))
 ```
-
-```{r}
-plot(fitA)
-```
-
-```{r}
-plot(fitAgamma)
-```
-
-```{r}
-#Residual analysis
-df <- data.frame(
-    x = resid(fitAgamma, 'deviance'),
-    group = rep("A"), each = nrow(data)
-)
-ggplot(df, aes(sample = x)) + 
-    theme_minimal() + geom_qq() + 
-    geom_abline(slope = 1, intercept = 0, color = 'red')
-```
-
-
-```{r}
-fitB <- lm(Hours.per.day ~ Depressed + Insomniac)
+fitB <- lm(Hours.per.day ~ log(Age) + Depressed + Insomniac)
 summary(fitB)
+
+```{r, echo = FALSE}
+# log Hours.per.day +1
+fitBlog <- lm(log(Hours.per.day + 1) ~ log(Age) + Depressed + Insomniac)
+summary(fitBlog)
+
+# Residuals vs. Fitted Values Plot and QQ Plot
+par(mfrow = c(1,2))
+plot(fitBlog, which = c(1,2))
 ```
 
-```{r}
-fitC <- lm(Hours.per.day ~ Age + Anxious)
-summary(fitC)
-```
+```{r, echo = FALSE}
+# gamma glm
+fitBgamma <- glm(Hours.per.day + 1 ~ log(Age) + Depressed + Insomniac,
+                 family = Gamma (link = 'log'))
+summary(fitBgamma)
 
-```{r}
-fitD <- lm(Hours.per.day ~ Anxious + Depressed + Insomniac)
-summary(fitD)
-```
-
-```{r}
-#fitA without intercept
-fitE <- lm(Hours.per.day ~ -1 + Age + Anxious + Depressed + Insomniac + Music.effects)
-summary(fitE)
- 
-
-```
-
-# Plots of fitted models
-
-
-
-fitA:
-```{r}
-par(mfrow = c(2,2))
-plot(fitA)
-```
-
-fitB:
-```{r}
-par(mfrow = c(2,2))
-plot(fitB)
-```
-
-fitC:
-```{r}
-par(mfrow = c(2,2))
-plot(fitC)
-```
-
-fitD:
-```{r}
-par(mfrow = c(2,2))
-plot(fitD)
-```
-
-fitE:
-```{r}
-par(mfrow = c(2,2))
-plot(fitE)
-```
-
-
-# ANOVA test
-```{r}
-anova(fitAold, fitE)
+# Residuals vs. Fitted Values Plot and QQ Plot
+par(mfrow = c(1,2))
+plot(fitBgamma, which = c(1,2))
 ```
 # AIC
-```{r}
-AIC(fitA)
-AIC(fitB)
-AIC(fitC)
-AIC(fitD)
-AIC(fitE)
-```
-# BIC
-```{r}
-BIC(fitA)
-BIC(fitB)
-BIC(fitC)
-BIC(fitD)
-BIC(fitE)
-```
-fitB has the best fit according to AIC and BIC because it has the lowest AIC and BIC.
-(might be important?)
-For the AIC, fitA, fitB, and fitE have very similar AICs but, as noted, fitB has the lowest.
+```{r, echo = FALSE}
+AIC(fitAlog)
+AIC(fitBlog)
 
+AIC(fitAgamma)
+AIC(fitBgamma)
+```
+
+# BIC
+```{r, echo = FALSE}
+BIC(fitAlog)
+BIC(fitBlog)
+
+BIC(fitAgamma)
+BIC(fitBgamma)
+```
+fitAlog is a better fit than fitBlog according to AIC because it has a lower AIC.
+fitBlog is a better fit than fitAlog according to BIC because it has a lower BIC.
+
+fitAgamma is a better fit than fitBgamma according to AIC because it has a lower AIC.
+fitBgamma is a better fit than fitAgamma according to BIC because it has a lower BIC.
