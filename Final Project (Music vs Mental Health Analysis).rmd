@@ -156,10 +156,17 @@ BIC(fitBgamma)
 - fitAgamma is a better fit than fitBgamma according to AIC because it has a lower AIC.
 - fitBgamma is a better fit than fitAgamma according to BIC because it has a lower BIC.
 
+# Interpretation of the final model
+- What would make it better? What if?? Imagine a perfect data and compare the dataset with what you have. Think a systematic reason of why they leave it blank.
 
+# Diagnostics 
+- Check whether the model is good fit. 
+- Do you think that the assumption are met)
 
-# Analysis and Conclusion
-
+# Discussion and Conclusion
+- Since the multiple R-squared in both models are low, it means that the independent variables in the models are not very effective at explaining the variation in the dependent variables.
+- Have units in the interpretation
+- Does it have positive or negative impact or effect?
 
 
 
