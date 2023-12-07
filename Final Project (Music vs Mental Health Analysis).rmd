@@ -5,10 +5,8 @@ date: "December 2, 2023"
 output: pdf_document
 ---
 
-
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ```
 
 
@@ -18,18 +16,18 @@ We aim to explore how music impact mental health by analyzing relevant data. Thi
 
 # Importing the dataset
 
-```{r}
+```{r, echo = False}
 data <- read.csv('mxmh_survey_results.csv')
 head(data)
 ```
-```{r}
+```{r, echo = False}
 require('tidyr')
 require('dplyr')
 require('ggplot2')
 ```
 # Making categories for Anxious, Depressed, and Insomniac
 
-```{r}
+```{r, echo = False}
 # mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
 data$Anxious = ifelse(data$Anxiety > 5, 1, 0)
 # mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
@@ -46,8 +44,12 @@ attach(data)
 We don't need to test for non-linearity for categorical variables so we will only test for non-linearity on the continuous variables, namely age.
 ```{r}
 ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, Age)) + 
-    theme_minimal() + geom_point() + facet_wrap('name', scales = 'free')
+  theme_minimal() + geom_point() +
+  labs(title = "Non-linearity For Categorical Variables") +
+  labs(x = "Hours Per Day", y = " Age")
+
 ```
+
 Plotting the covariate age against hours per day, it doesn't seem that there is a linear relationship between the 2.
 To try to fix this, let's take the log of age.
 With log age:
@@ -57,7 +59,7 @@ ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, log(Age))) +
 ```
 # Fitted model
 ```{r, echo = FALSE}
-fitA <- lm(data$Hours.per.day ~ data$Age + data$Anxious + data$Depressed + data$Insomniac + data$Music.effects)
+fitA <- lm(Hours.per.day ~ Age + Anxious + Depressed + Insomniac + Music.effects)
 summary(fitA)
 
 
@@ -70,7 +72,7 @@ FitA is not normal as shown in the Q-Q Plot where the error points are rising of
 
 
 ```{r,echo = FALSE}
-fitB <- lm(data$Hours.per.day ~ data$Depressed + data$Insomniac )
+fitB <- lm(Hours.per.day ~ Depressed + Insomniac)
 summary(fitB)
 
 par(mfrow = c(2,2))
@@ -82,7 +84,7 @@ FitB is not normal as shown in the Q-Q Plot where the error points are rising of
 
 
 ```{r,echo = FALSE}
-fitC <- lm(data$Hours.per.day ~ data$Age + data$Anxious )
+fitC <- lm(Hours.per.day ~ Age + Anxious )
 summary(fitC)
 
 
@@ -93,7 +95,7 @@ FitC is not normal as shown in the Q-Q Plot where the error points are rising of
 
 ```{r,echo = FALSE}
 
-fitD <- lm(data$Hours.per.day ~ data$Anxious + data$Depressed + data$Insomniac)
+fitD <- lm(Hours.per.day ~ Anxious + Depressed + Insomniac)
 summary(fitD)
 
 par(mfrow = c(2,2))
@@ -103,7 +105,7 @@ FitC is not normal as shown in the Q-Q Plot where the error points are rising of
 
 
 ```{r,echo = FALSE}
-fitE <- lm(data$Hours.per.day ~ -1 + data$Age + data$Anxious + data$Depressed + data$Insomniac + data$Music.effects)
+fitE <- lm(Hours.per.day ~ -1 + Age + Anxious + Depressed + Insomniac + Music.effects)
 summary(fitE)
 
 par(mfrow = c(2,2))
@@ -115,12 +117,9 @@ anova_result
 ```
 
 
-# ANOVA test
-```{r}
-anova(fitA, fitE)
-```
 # AIC
 ```{r}
+# Add  labels
 AIC(fitA)
 AIC(fitB)
 AIC(fitC)
@@ -144,9 +143,12 @@ BIC(fitE)
 
 
 
+
+\newpage
 # Code Appendix:
 
 ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+
 ```
 
 
