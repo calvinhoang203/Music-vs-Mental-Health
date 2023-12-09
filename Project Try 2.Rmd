@@ -1,5 +1,5 @@
 ---
-title: "Final Project: Music v. Mental Health"
+title: "Final Project: Music vs. Mental Health"
 author: "Hieu (Calvin) Hoang, Karen Nguyen, Vy Vo"
 date: "Submitted 12-09-2023"
 output:
