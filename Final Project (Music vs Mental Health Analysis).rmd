@@ -1,31 +1,38 @@
 ---
 title: "Final Project: Music vs Mental Health Analysis"
-author: "Calvin, Vy, Karen"
+author: "Hieu (Calvin) Hoang, Vy Vo, Karen Nguyen"
 date: "December 2, 2023"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.align='center')
-#knitr::opts_chunk$set(fig.width = 12, fig.height = 6)
 ```
 
+# Distribution Report: 
 
-# Executive Summary
+Hieu (Calvin) Hoang: Organization, decoding, interpretation/analysis and editor
+Karen Nguyen: Coding, interpretation/analysis, and writer
+Vy Vo: Coding, interpretation/analysis, and writer
 
-We aim to explore how music impact mental health by analyzing relevant data. This will help us determine how music is the most beneficial for mental health. We'll compare this to the amount of people suffering from certain mental conditions.
+# Introduction
+
+In this project, we will investigate the relationship between how many hours per day someone listens to music (our response variable) and their age and mental health. To do this, we used [data collected from a music and mental health survey](https://www.kaggle.com/code/laurenlavelle/mental-health-and-music-analysis/input).
 
 # Importing the dataset
 
-```{r, echo = FALSE}
-data <- read.csv('mxmh_survey_results.csv')
-head(data, 10)
-```
 ```{r, echo = FALSE}
 require('tidyr')
 require('dplyr')
 require('ggplot2')
 ```
+
+```{r, echo = FALSE}
+data <- read.csv('mxmh_survey_results.csv')
+data <- data %>% drop_na(Hours.per.day, Age, Anxiety, Depression, Insomnia, Music.effects)
+head(data, 10)
+```
+
 # Making categories for Anxious, Depressed, and Insomniac
 
 Since our data had people rate their anxiety, depression, insomnia, and OCD and a scale of 1 to 10 (only integers), we will make categories for `Anxiety`, `Depression`, `Insomnia`, and `OCD` so that the categories will be binary. For example, for `Anxiety`, we will have a category called `Anxious` that is 1 if `Anxiety` > 5 and 0 otherwise.
@@ -45,8 +52,10 @@ attach(data)
 
 We don't need to test for non-linearity for categorical variables so we will only test for non-linearity for the continuous variables, namely age.
 
-
+## Plots
 ```{r, echo = FALSE, warning = FALSE}
+
+
 ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, Age)) + 
   labs(title = 'Age vs. Hours per day') +
   theme_minimal() + geom_point()
@@ -73,14 +82,20 @@ Also, since half our models will have log Hours.per.day, we should look also loo
 ggplot(pivot_longer(data = data, 2), aes(log(Hours.per.day + 1), log(Age))) + labs(title = 'log(Age) vs. log(Hours per day + 1') +
     theme_minimal() + geom_point()
 ```
-The relationship between log(Age) and log(Hours.per.day + 1) is not obviously non-linear.
+The relationship between log(Age) and log(Hours.per.day + 1) is not obviously non-linear, so we can use log(Age) in the linear model with log(Hours.per.day + 1).
 
 \newpage
-# Fitted model
 
-Since the hours per day that people listen to music is not normally distributed, we created two fits, one where we log Hours.per.day and the other where we fit it to a log-link Gamma distribution.
+
+# Fitted models
+
+For fitA, which will have a log model, `fitAlog`, and a gamma generalized linear model (glm), `fitAgamma`, with covariates `log(Age)`,`Anxious`, `Depressed`, `Insomniac`, and `Music.effects`.  
+`Anxious`, `Depressed`, and `Insomniac` are the binary categories we made earlier.  
+`Music.effects` is a categorical variable where people reported what effect they felt music had on their mental health. The categories for `Music.effects` are `Improve`, `No effect`, and `Worsen`.
 
 ```{r, echo = FALSE, fig.width = 11, fig.height = 6}
+## Fits
+
 # fitA where we log Hours.per.day + 1 since Hours.per.day is not normally distributed.
 fitAlog <- lm(log(Hours.per.day + 1) ~ log(Age) + Anxious + Depressed + Insomniac + Music.effects)
 summary(fitAlog)
@@ -88,93 +103,146 @@ summary(fitAlog)
 # Residuals vs. Fitted Values Plot and QQ Plot
 par(mfrow = c(1,2))
 plot(fitAlog, which = c(1,2))
+
+
 ```
 
 ```{r, echo = FALSE, fig.width = 11, fig.height = 6}
 # fitA where it's fitted to a gamma distribution
 # For both fitAlog and fitAgamma, we add 1 to Hours.per.day because we can't log zero.
-fitAgamma <- glm(Hours.per.day + 1~ log(Age) + Anxious + Depressed + Insomniac + Music.effects,
+fitAgamma <- glm(Hours.per.day + 0.001 ~ log(Age) + Anxious + Depressed + Insomniac + Music.effects,
                  family = Gamma (link = 'log'))
 summary(fitAgamma)
 
 # Residuals vs. Fitted Values Plot and QQ Plot
 par(mfrow = c(1,2))
 plot(fitAgamma, which = c(1,2))
+
 ```
 Analysis:
 
-  - For Log: From looking at the Residual Vs Fitted plot for fitA_log, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitA_log does have constant variance. However, there are possible outliers such as point 696 or 19. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers. 
+  - For Log: From looking at the Residual Vs Fitted plot for fitAlog, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitA_log does have constant variance. However, there are possible outliers such as point 695 or 18. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers. 
 
-  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that fitA_gamma, doesn't seem to violate normality assumption. In another word, fitA_gamma have a constant Variance. However, there are possible outliers such as points 696 or 19. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
+  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that fitAgamma doesn't seem to violate normality assumption. In another word, fitAgamma have a constant Variance. However, there are possible outliers such as points 695 or 18. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
+  
+  
+For the fitB's, `fitBlog` and `fitBgamma`, we used only the covariates that were individually significant in `fitA` and `fitAgamma`. As a result, the covariates for `fitBlog` and `fitBgamma` are `log(Age)`, `Depressed`, and `Insomniac`.
 
 ```{r, echo = FALSE, fig.width = 11, fig.height = 6}
-# log Hours.per.day +1
+# log Hours.per.day + 1
 fitBlog <- lm(log(Hours.per.day + 1) ~ log(Age) + Depressed + Insomniac)
 summary(fitBlog)
 
 # Residuals vs. Fitted Values Plot and QQ Plot
 par(mfrow = c(1,2))
 plot(fitBlog, which = c(1,2))
+
 ```
 
 ```{r, echo = FALSE, fig.width = 11, fig.height = 6}
 # gamma glm
-fitBgamma <- glm(Hours.per.day + 1 ~ log(Age) + Depressed + Insomniac,
+fitBgamma <- glm(Hours.per.day + 0.001 ~ log(Age) + Depressed + Insomniac,
                  family = Gamma (link = 'log'))
 summary(fitBgamma)
 
 # Residuals vs. Fitted Values Plot and QQ Plot
 par(mfrow = c(1,2))
 plot(fitBgamma, which = c(1,2))
+
 ```
 Analysis:
 
-  - For Log: From looking at the Residual Vs Fitted plot for fitB_log, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitB_log does have constant variance. However, there are possible outliers such as point 696 or 19. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers. 
+  - For Log: From looking at the Residual Vs Fitted plot for fitBlog, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitB_log does have constant variance. However, there are possible outliers such as point 695 or 18. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers.
 
-  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that fitB_gamma, doesn't seem to violate normality assumption. In another word, fitA_gamma have a constant Variance. However, there are possible outliers such as points 696 or 19. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
+  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that fitBgamma doesn't seem to violate normality assumption. In other word, fitBgamma have a constant Variance. However, there are possible outliers such as points 695 or 18. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
 
 # AIC
-```{r, echo = FALSE}
+```{r, echo = FALSE, results = FALSE}
+##AIC
+
 AIC(fitAlog)
 AIC(fitBlog)
 
 AIC(fitAgamma)
 AIC(fitBgamma)
+
 ```
+AIC(fitAlog) = `r AIC(fitAlog)`   
+AIC(fitBlog) = `r AIC(fitBlog)`  
+
+AIC(fitAgamma) = `r AIC(fitAgamma)`  
+AIC(fitBgamma) = `r AIC(fitBgamma)`
 
 # BIC
-```{r, echo = FALSE}
+```{r, echo = FALSE, results = FALSE}
+## BIC
+
 BIC(fitAlog)
 BIC(fitBlog)
 
 BIC(fitAgamma)
 BIC(fitBgamma)
-```
-- fitAlog is a better fit than fitBlog according to AIC because it has a lower AIC.
-- fitBlog is a better fit than fitAlog according to BIC because it has a lower BIC.
 
-- fitAgamma is a better fit than fitBgamma according to AIC because it has a lower AIC.
-- fitBgamma is a better fit than fitAgamma according to BIC because it has a lower BIC.
+```
+BIC(fitAlog) = `r BIC(fitAlog)`   
+BIC(fitBlog) = `r BIC(fitBlog)`  
+
+BIC(fitAgamma) = `r BIC(fitAgamma)`  
+BIC(fitBgamma) = `r BIC(fitBgamma)`  
+
+# AIC and BIC analysis
+fitAlog is a better fit than fitBlog according to AIC because it has a lower AIC.
+fitBlog is a better fit than fitAlog according to BIC because it has a lower BIC.
+
+fitAgamma is a better fit than fitBgamma according to AIC because it has a lower AIC.
+fitBgamma is a better fit than fitAgamma according to BIC because it has a lower BIC.
+
+Since which model is better according to AIC and BIC is different, we can use either fitA or fitB. One isn't clearly better than the other. We can confirm this with anova tests.
+
+# ANOVA F-Tests
+```{r}
+## ANOVA tests
+
+anova(fitAlog, fitBlog)
+
+```
+The null hypothesis $H_0$: $\beta_2 = \beta_5 = 0$ vs. $H_1$: $\beta_2 \ne 0$ or $\beta_2 \ne 0$. We fail to reject the null because the $Pr(>F) = 0.06215 > \alpha = 0.05$. As a result, fitAlog and fitBlog are the same so we will use the smaller model, fitBlog.
+
+```{r}
+anova(fitAgamma, fitBgamma)
+
+```
+The deviance is negative because fitAgamma and fitBgamma violated normality assumptions.
 
 # Interpretation of the final model
-- What would make it better? What if?? Imagine a perfect data and compare the dataset with what you have. Think a systematic reason of why they leave it blank.
+Since the gamma distributions violate normality, we would prefer not to use them for our final model. Based on the AIC, BIC, and ANOVA models, which show us that `fitAlog` and `fitBlog` are about the same, we will use the smaller model for our final model.
+As a result, our final model is `fitBlog`, which is:
+$log(Hours.per.day + 1) =  1.785 -0.168 log(Age) + 0.133 Depressed + 0.115 Insomniac$
 
-# Diagnostics 
-- Check whether the model is good fit. 
-- Do you think that the assumption are met)
+According to `fitBlog`: 
+- If log(Age) increase by 1 unit then log(Hours.per.day + 1) will decrease by 0.168 units.
+- If a person ranks their Depression above 5 on a scale from 1 to 10, then log(Hours.per.day + 1) will increase by 0.133 units.
+- If a person ranks their Insomnia above 5 on a scale from 1 to 10, then log(Hours.per.day + 1) will increase by 0.115 units.
 
-# Discussion and Conclusion
-- Since the multiple R-squared in both models are low, it means that the independent variables in the models are not very effective at explaining the variation in the dependent variables.
-- Have units in the interpretation
-- Does it have positive or negative impact or effect?
+One thing to note for our models is that our $R^2$'s were low, including fitBlog, which adjusted $R^2 = 0.0397$. We realize this means that our models, including fitBlog, explain very little variation in the response (transformed hours per day).
 
+# Discussion
+
+In our project, we faced a few minor setbacks. For example, our dataset contained a notable amount of missing values (NA), requiring us to remove rows to ensure accurate calculations for AIC, BIC, and ANOVA. By removing only a small portion of the data, we understand that it could have potentially affected our calculation.
+
+Another difficulty we encountered was the large amount of categorical variables in our dataset. While categorical variables are useful and we did use many in our model, more quantitative variables would be helpful. 
+
+# Conclusion
+
+Overall, we decide that fitBlog is the best model out of the four we made because it does best to capture the relationship between Hour Per Day with Age and Mental Health. 
+
+This project have inspire a possible future study ideas where we utilize the many music genre variables that our dataset and possibly investigate how different music genre affect mental health. 
 
 
 \newpage
-# Code Appendix:
+\begin{center} Appendix: R Script \end{center}
 
-```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
-
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
 ```
 
 
