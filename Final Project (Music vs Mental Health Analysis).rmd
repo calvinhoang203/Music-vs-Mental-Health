@@ -232,6 +232,8 @@ In our project, we faced a few minor setbacks. For example, our dataset containe
 
 Another difficulty we encountered was the large amount of categorical variables in our dataset. While categorical variables are useful and we did use many in our model, more quantitative variables would be helpful. 
 
+Finally, we attempted to find predicted MSE by using LOOCV and kfoldCV to further support the best-fit model argument. However, despite consulting the TA, we continuously encountered errors indicating differences in variable sizes. Ultimately, we decided that since we already have results from ANOVA, AIC and BIC, it is not worth continuing to debug. We firmly believe that the MSE results would align with our other tests, supporting that fitBlog is our best model.
+
 # Conclusion
 
 Overall, we decide that fitBlog is the best model out of the four we made because it does best to capture the relationship between Hour Per Day with Age and Mental Health. 
