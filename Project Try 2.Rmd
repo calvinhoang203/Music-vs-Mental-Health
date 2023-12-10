@@ -1,7 +1,7 @@
 ---
-title: "Project Try 2"
-author: "Karen Nguyen"
-date: "2023-12-04"
+title: "Final Project: Music vs. Mental Health"
+author: "Hieu (Calvin) Hoang, Karen Nguyen, Vy Vo"
+date: "Submitted 12-09-2023"
 output:
   pdf_document: default
   html_document: default
@@ -29,10 +29,15 @@ attach(data)
 head(data)
 
 ```
+# Distribution Report: 
+
+Hieu (Calvin) Hoang: Organization, decoding, interpretation/analysis and editor  
+Karen Nguyen: Coding, interpretation/analysis, and writer  
+Vy Vo: Coding, interpretation/analysis, and writer  
 
 # Introduction
 
-In this project, we will look to see if there is a relationship between how many hours per day someone listens to music and their age and mental health. To do this, we used [data collected from a music and mental health survey](https://www.kaggle.com/code/laurenlavelle/mental-health-and-music-analysis/input).
+In this project, we will investigate the relationship between how many hours per day someone listens to music (our response variable) and their age and mental health. To do this, we used [data collected from a music and mental health survey](https://www.kaggle.com/code/laurenlavelle/mental-health-and-music-analysis/input).
 
 # Making categories for Anxiety, Depression, and Insomnia
 
@@ -121,9 +126,9 @@ plot(fitAgamma, which = c(1,2))
 ```
 Analysis:
 
-  - For Log: From looking at the Residual Vs Fitted plot for fitA_log, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitA_log does have constant variance. However, there are possible outliers such as point 696 or 19. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers. 
+  - For Log: From looking at the Residual Vs Fitted plot for `fitAlog`, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that `fitAlog` does have constant variance. However, there are possible outliers such as point 696 or 19. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers. 
 
-  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that fitA_gamma, doesn't seem to violate normality assumption. In another word, fitA_gamma have a constant Variance. However, there are possible outliers such as points 696 or 19. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
+  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that `fitAgamma`, doesn't seem to violate normality assumption. In another word, `fitAgamma` have a constant Variance. However, there are possible outliers such as points 696 or 19. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
   
   
 For the fitB's, `fitBlog` and `fitBgamma`, we used only the covariates that were individually significant in `fitA` and `fitAgamma`. As a result, the covariates for `fitBlog` and `fitBgamma` are `log(Age)`, `Depressed`, and `Insomniac`.
@@ -152,60 +157,10 @@ plot(fitBgamma, which = c(1,2))
 ```
 Analysis:
 
-  - For Log: From looking at the Residual Vs Fitted plot for fitB_log, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitB_log does have constant variance. However, there are possible outliers such as point 696 or 19. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers. 
+  - For Log: From looking at the Residual Vs Fitted plot for `fitBlog`, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that `fitBlog` does have constant variance. However, there are possible outliers such as point 696 or 19. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers. 
 
-  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that fitB_gamma, doesn't seem to violate normality assumption. In another word, fitA_gamma have a constant Variance. However, there are possible outliers such as points 696 or 19. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
+  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that `fitBgamma`, doesn't seem to violate normality assumption. In another word, `fitAgamma` have a constant Variance. However, there are possible outliers such as points 696 or 19. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
   
-# MSE
-```{r}
-kfoldCV <- function(fit, k = 5) {
-    n <- nrow(fit$model)
-    k <- min(n, k) # 
-    data <- fit$model[sample(1:n,n),] #reshuffle data
-    groups <- split(data, (1:n)%%k) #split data into k groups
-    MSE <- c()
- for (i in 1:k) {
-    fit <- update(fit, data = do.call('rbind', groups[-i]))
-    yhat <- predict(fit, groups[[i]], 'response')
-    MSE[i] <- mean((groups[[i]]$y - yhat)^2)  # Replaced G1 with the correct response variable name 'y'
-}
-    return (mean(MSE))
-}
-
-kfoldCV(fitAlog)
-
-kfoldCV(fitAgamma)
-
-
-```
-```{r}
-LOOCV <- function(fit) {
-    n <- nrow(data)
-    MSE <- numeric(n)
-    for (i in 1:n) {
-        fit <- update(fit, data = data[-i,])
-        yhat <- predict(fit, data[i,], 'response')
-        MSE[i] <- (data$Hours.per.day[i] - yhat)^2  # Assuming 'y' is the response variable name in your 'math' dataset
-    }
-    return(mean(MSE))
-}
-
-LOOCV(fitAlog)
-```
-```{r}
-LOOCV <- function(fit) {
-    math = fit$model
-    n <- nrow(math)
-    MSE <- c()
-    for (i in 1:n) {
-        fit <- update(fit, data = math[-i,])
-        yhat <- predict(fit, math[i,], 'response')
-        MSE[i] <- (math$y[i] - yhat)^2
-    }
-    return (mean(MSE))
-}
-```
-
 # AIC
 ```{r, echo = FALSE, results = FALSE}
 ##AIC
@@ -241,11 +196,12 @@ BIC(fitAgamma) = `r BIC(fitAgamma)`
 BIC(fitBgamma) = `r BIC(fitBgamma)`  
 
 # AIC and BIC analysis
-fitAlog is a better fit than fitBlog according to AIC because it has a lower AIC.
-fitBlog is a better fit than fitAlog according to BIC because it has a lower BIC.
 
-fitAgamma is a better fit than fitBgamma according to AIC because it has a lower AIC.
-fitBgamma is a better fit than fitAgamma according to BIC because it has a lower BIC.
+`fitAlog` is a better fit than `fitBlog` according to AIC because it has a lower AIC.
+`fitBlog` is a better fit than `fitAlog` according to BIC because it has a lower BIC.
+
+`fitAgamma` is a better fit than `fitBgamma` according to AIC because it has a lower AIC.
+`fitBgamma` is a better fit than `fitAgamma` according to BIC because it has a lower BIC.
 
 Since which model is better according to AIC and BIC is different, we can use either fitA or fitB. One isn't clearly better than the other. We can confirm this with anova tests.
 
@@ -262,7 +218,35 @@ The null hypothesis $H_0$: $\beta_2 = \beta_5 = 0$ vs. $H_1$: $\beta_2 \ne 0$ or
 anova(fitAgamma, fitBgamma)
 
 ```
-The deviance is negative because fitAgamma and fitBgamma violated normality assumptions. 
+The deviance is negative, likely because `fitAgamma` and `fitBgamma` violated normality assumptions. We can't reject the null hypothesis if deviance is negative since we can think of it as though deviance is 0. As a result, `fitAgamma` and `fitBgamma` are the same and we will usually choose the smaller model. However, since `fitAgamma` and `fitBgamma` violate normality assumptions, neither of them will be used for our final model.
+
+# Interpretation of the final model
+
+Since the gamma distributions violate normality, we would prefer to not use them for our final model. Based on the AIC, BIC, and ANOVA models which show us that `fitAlog` and `fitBlog` are about the same, we will use the smaller model for our final model.
+As a result, our final model is `fitBlog`, which is:
+$log(Hours.per.day + 1) =  1.785 -0.168 log(Age) + 0.133 Depressed + 0.115 Insomniac$
+
+According to `fitBlog`: 
+If log(Age) increase by 1 unit then log(Hours.per.day + 1) will decrease by 0.168 units.
+If a person ranks their Depression above 5 on a scale from 1 to 10, then log(Hours.per.day + 1) will increase by 0.133 units.
+If a person ranks their Insomnia above 5 on a scale from 1 to 10, then log(Hours.per.day + 1) will increase by 0.115 units.
+
+One thing to note for our models is that our $R^2$'s were low, including `fitBlog`, which adjusted $R^2 = 0.0397$. We realize this means that our models, including `fitBlog`, explain very little variation in the response (transformed hours per day).
+
+# Discussion
+
+In our project, we faced a few minor setbacks. For example, our dataset contained a notable amount of missing values (NA), requiring us to remove rows to ensure accurate calculations for AIC, BIC, and ANOVA. By removing only a small portion of the data, we understand that it could have potentially affected our calculation.
+
+Another difficulty we encountered was the large amount of categorical variables in our dataset. While categorical variables are useful and we did use many in our model, more quantitative variables would be helpful. 
+
+Finally, we attempted to find predicted MSE by using LOOCV and kfoldCV to further support the best-fit model argument. However, despite consulting the TA, we continuously encountered errors indicating differences in variable sizes. Ultimately, we decided that since we already have results from ANOVA, AIC and BIC, it is not worth continuing to debug. We firmly believe that the MSE results would align with our other tests, supporting that fitBlog is our best model.
+
+# Conclusion
+
+Overall, we decide that `fitBlog` is the best model out of the four we made because it does best to capture the relationship between Hour Per Day with Age and Mental Health. 
+
+This project have inspire a possible future study ideas where we utilize the many music genre variables that our dataset and possibly investigate how different music genre affect mental health. 
+
 \newpage
 \begin{center} Appendix: R Script \end{center}
 
