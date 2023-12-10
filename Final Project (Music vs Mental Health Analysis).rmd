@@ -21,13 +21,13 @@ In this project, we will investigate the relationship between how many hours per
 
 # Importing the dataset
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, message = FALSE}
 require('tidyr')
 require('dplyr')
 require('ggplot2')
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, results = FALSE}
 data <- read.csv('mxmh_survey_results.csv')
 data <- data %>% drop_na(Hours.per.day, Age, Anxiety, Depression, Insomnia, Music.effects)
 head(data, 10)
@@ -36,7 +36,7 @@ head(data, 10)
 # Making categories for Anxious, Depressed, and Insomniac
 
 Since our data had people rate their anxiety, depression, insomnia, and OCD and a scale of 1 to 10 (only integers), we will make categories for `Anxiety`, `Depression`, `Insomnia`, and `OCD` so that the categories will be binary. For example, for `Anxiety`, we will have a category called `Anxious` that is 1 if `Anxiety` > 5 and 0 otherwise.
-```{r, echo = FALSE}
+```{r, echo = FALSE, results = FALSE}
 # mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
 data$Anxious = ifelse(data$Anxiety > 5, 1, 0)
 # mark people as anxious (1) if anxiety > 5, not anxious (0) otherwise
@@ -47,15 +47,12 @@ data$Insomniac = ifelse(data$Insomnia > 5, 1, 0)
 head(data, 10)
 attach(data)
 ```
-\newpage
 # Testing Non-linearity
 
 We don't need to test for non-linearity for categorical variables so we will only test for non-linearity for the continuous variables, namely age.
 
 ## Plots
 ```{r, echo = FALSE, warning = FALSE}
-
-
 ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, Age)) + 
   labs(title = 'Age vs. Hours per day') +
   theme_minimal() + geom_point()
@@ -63,12 +60,12 @@ ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, Age)) +
 There doesn't seem to be a linear relationship between age and hours per day. We can transform age by logging it so that the relationship looks less non-linear.
 With log age:
 
-```{r, echo = FALSE, warning = FALSE}
+```{r, echo = FALSE, fig.height = 4}
 # log transform because there are a few high values and many low values
 ggplot(pivot_longer(data = data, 2), aes(Hours.per.day, log(Age))) + labs(title = 'log(Age) vs. Hours per day') +
     theme_minimal() + geom_point()
 ```
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.height = 4}
 hist(Hours.per.day)
 # Hours per day is not normal so we can log transform it or use gamma glm
 ```
@@ -77,14 +74,12 @@ Since the hours per day that people listen to music is not normally distributed,
 
 Also, since half our models will have log Hours.per.day, we should look also look to see if log(Age) and log(Hours.per.day  + 1).
 
-```{r, echo = FALSE, warning = FALSE}
+```{r, echo = FALSE, fig.height = 4}
 # log transform because there are a few high values and many low values
 ggplot(pivot_longer(data = data, 2), aes(log(Hours.per.day + 1), log(Age))) + labs(title = 'log(Age) vs. log(Hours per day + 1') +
     theme_minimal() + geom_point()
 ```
 The relationship between log(Age) and log(Hours.per.day + 1) is not obviously non-linear, so we can use log(Age) in the linear model with log(Hours.per.day + 1).
-
-\newpage
 
 
 # Fitted models
