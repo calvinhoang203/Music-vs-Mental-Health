@@ -88,7 +88,7 @@ For fitA, which will have a log model, `fitAlog`, and a gamma generalized linear
 `Anxious`, `Depressed`, and `Insomniac` are the binary categories we made earlier.  
 `Music.effects` is a categorical variable where people reported what effect they felt music had on their mental health. The categories for `Music.effects` are `Improve`, `No effect`, and `Worsen`.
 
-```{r, echo = FALSE, fig.width = 11, fig.height = 6}
+```{r, echo = FALSE, fig.width = 11, fig.height = 6, fig.cap = "Residual vs. Fitted Values Plot"}
 ## Fits
 
 # fitA where we log Hours.per.day + 1 since Hours.per.day is not normally distributed.
@@ -97,8 +97,9 @@ summary(fitAlog)
 
 # Residuals vs. Fitted Values Plot and QQ Plot
 par(mfrow = c(1,2))
-plot(fitAlog, which = c(1,2))
+plot(fitAlog, which = 1, caption = '', main = 'Residual vs. Fitted Values Plot', col = 'lightskyblue')
 
+plot(fitAlog, which = 2, caption = '', main = 'Q-Q Plot', col = 'lightskyblue')
 
 ```
 
@@ -111,7 +112,10 @@ summary(fitAgamma)
 
 # Residuals vs. Fitted Values Plot and QQ Plot
 par(mfrow = c(1,2))
-plot(fitAgamma, which = c(1,2))
+plot(fitAgamma, which = 1, caption = '', main = 'Residual vs. Fitted Values Plot', col = 'lightskyblue')
+
+plot(fitAgamma, which = 2, caption = '', main = 'Q-Q Plot', col = 'lightskyblue')
+
 
 ```
 Analysis:
@@ -130,7 +134,10 @@ summary(fitBlog)
 
 # Residuals vs. Fitted Values Plot and QQ Plot
 par(mfrow = c(1,2))
-plot(fitBlog, which = c(1,2))
+plot(fitBlog, which = 1, caption = '', main = 'Residual vs. Fitted Values Plot', col = 'lightskyblue')
+
+plot(fitBlog, which = 2, caption = '', main = 'Q-Q Plot', col = 'lightskyblue')
+
 
 ```
 
@@ -142,7 +149,10 @@ summary(fitBgamma)
 
 # Residuals vs. Fitted Values Plot and QQ Plot
 par(mfrow = c(1,2))
-plot(fitBgamma, which = c(1,2))
+plot(fitBgamma, which = 1, caption = '', main = 'Residual vs. Fitted Values Plot', col = 'lightskyblue')
+
+plot(fitBgamma, which = 2, caption = '', main = 'Q-Q Plot', col = 'lightskyblue')
+
 
 ```
 Analysis:
