@@ -84,7 +84,7 @@ The relationship between log(Age) and log(Hours.per.day + 1) is not obviously no
 
 # Fitted models
 
-For fitA, which will have a log model, `fitAlog`, and a gamma generalized linear model (glm), `fitAgamma`, with covariates `log(Age)`,`Anxious`, `Depressed`, `Insomniac`, and `Music.effects`.  
+For fitA, which will have a log model, `fitAlog`, with covariates `log(Age)`,`Anxious`, `Depressed`, `Insomniac`, and `Music.effects`.  
 `Anxious`, `Depressed`, and `Insomniac` are the binary categories we made earlier.  
 `Music.effects` is a categorical variable where people reported what effect they felt music had on their mental health. The categories for `Music.effects` are `Improve`, `No effect`, and `Worsen`.
 
@@ -122,8 +122,10 @@ Analysis:
 
   - For Log: From looking at the Residual Vs Fitted plot for fitAlog, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitA_log does have constant variance. However, there are possible outliers such as point 695 or 18. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers. 
 
-  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that fitAgamma doesn't seem to violate normality assumption. In another word, fitAgamma have a constant Variance. However, there are possible outliers such as points 695 or 18. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
-  
+  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively points in Residuals and Fitted. This means that fitAgamma, doesn't seem to violate normality assumption because there is no pattern. In another word, fitAgamma does appear to have a constant Variance. However, there are possible outliers such as points 696 or 19. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
+
+Overall Analysis:
+Evidence from the Residual vs. Fitted plots and Q-Q plots for FitA and FitB indicates that the log model performs better than the gamma model as it doesn't violate normality. Therefore, we've chosen to exclude the gamma model and proceed with analyzing the two log fits.
   
 For the fitB's, `fitBlog` and `fitBgamma`, we used only the covariates that were individually significant in `fitA` and `fitAgamma`. As a result, the covariates for `fitBlog` and `fitBgamma` are `log(Age)`, `Depressed`, and `Insomniac`.
 
@@ -159,7 +161,10 @@ Analysis:
 
   - For Log: From looking at the Residual Vs Fitted plot for fitBlog, it seems that the normality assumption is not violated because the shape of the fit is cloud-like without any noticeable pattern. This means that fitB_log does have constant variance. However, there are possible outliers such as point 695 or 18. For the Normal Q-Q plot, normality doesn't seem to be violated because most error points remains on the normality line. Nevertheless, there are still evidences of outliers.
 
-  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. This means that fitBgamma doesn't seem to violate normality assumption. In other word, fitBgamma have a constant Variance. However, there are possible outliers such as points 695 or 18. For the Normal Q-Q plot, Gamma violated normality assumption, as errors points are going off the normal line.
+  - For Gamma: Since the distribution is Gamma, it is possible to observe clustering of negatively valued residuals in Residuals and Fitted. From the plot, it is evident that Gamma violates the normality assumptions. 
+
+Overall Analysis:
+Evidence from the Residual vs. Fitted plots and Q-Q plots for FitA and FitB indicates that the log model performs better than the gamma model as it doesn't violate normality. Therefore, we've chosen to exclude the gamma model and proceed with analyzing the two log fits.
 
 # AIC
 ```{r, echo = FALSE, results = FALSE}
@@ -168,15 +173,10 @@ Analysis:
 AIC(fitAlog)
 AIC(fitBlog)
 
-AIC(fitAgamma)
-AIC(fitBgamma)
-
 ```
 AIC(fitAlog) = `r AIC(fitAlog)`   
 AIC(fitBlog) = `r AIC(fitBlog)`  
 
-AIC(fitAgamma) = `r AIC(fitAgamma)`  
-AIC(fitBgamma) = `r AIC(fitBgamma)`
 
 # BIC
 ```{r, echo = FALSE, results = FALSE}
@@ -185,22 +185,15 @@ AIC(fitBgamma) = `r AIC(fitBgamma)`
 BIC(fitAlog)
 BIC(fitBlog)
 
-BIC(fitAgamma)
-BIC(fitBgamma)
-
 ```
 BIC(fitAlog) = `r BIC(fitAlog)`   
 BIC(fitBlog) = `r BIC(fitBlog)`  
 
-BIC(fitAgamma) = `r BIC(fitAgamma)`  
-BIC(fitBgamma) = `r BIC(fitBgamma)`  
 
 # AIC and BIC analysis
 fitAlog is a better fit than fitBlog according to AIC because it has a lower AIC.
 fitBlog is a better fit than fitAlog according to BIC because it has a lower BIC.
 
-fitAgamma is a better fit than fitBgamma according to AIC because it has a lower AIC.
-fitBgamma is a better fit than fitAgamma according to BIC because it has a lower BIC.
 
 Since which model is better according to AIC and BIC is different, we can use either fitA or fitB. One isn't clearly better than the other. We can confirm this with anova tests.
 
@@ -213,12 +206,6 @@ anova(fitAlog, fitBlog)
 ```
 The null hypothesis $H_0$: $\beta_2 = \beta_5 = 0$ vs. $H_1$: $\beta_2 \ne 0$ or $\beta_2 \ne 0$. We fail to reject the null because the $Pr(>F) = 0.06215 > \alpha = 0.05$. As a result, fitAlog and fitBlog are the same so we will use the smaller model, fitBlog.
 
-```{r}
-anova(fitAgamma, fitBgamma)
-
-```
-The deviance is negative because fitAgamma and fitBgamma violated normality assumptions.
-
 # Interpretation of the final model
 Since the gamma distributions violate normality, we would prefer not to use them for our final model. Based on the AIC, BIC, and ANOVA models, which show us that `fitAlog` and `fitBlog` are about the same, we will use the smaller model for our final model.
 As a result, our final model is `fitBlog`, which is:
@@ -230,6 +217,8 @@ According to `fitBlog`:
 - If a person ranks their Insomnia above 5 on a scale from 1 to 10, then log(Hours.per.day + 1) will increase by 0.115 units.
 
 One thing to note for our models is that our $R^2$'s were low, including fitBlog, which adjusted $R^2 = 0.0397$. We realize this means that our models, including fitBlog, explain very little variation in the response (transformed hours per day).
+
+Overall, there 
 
 # Discussion
 
